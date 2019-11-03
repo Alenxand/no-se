@@ -1,0 +1,65 @@
+""" Proyecto Fluidos II"""
+#Camacho Ake ALejandro
+import numpy as np 
+from matplotlib import pyplot as plt 
+from matplotlib import cm
+
+rho = 8900
+K = 100
+Cp = 420
+alpha = K/(rho*Cp)
+print(alpha)
+L=1
+nx=20
+dx = L/nx 
+x = np.linspace(0,L,nx+1)
+t_end = 1600 #[s]
+
+dt= 1
+nt= int(t_end/dt)
+
+T0 = 23
+TA = 400
+TB = -200
+
+T = np.ones(len(x))*T0
+T[0]=TA
+T[-1]=TB
+dTdt = np.empty(nx+1)
+
+t = np.linspace(0,t_end,nt)
+solucionTotal = np.zeros((len(t), len(x)))
+
+C = alpha*dt/dx**2
+if C > 0.5:
+    print(f"El metodo numerico no es estable (C={C})")
+    quit()
+else:
+    print(f"C={C}")
+
+plt.ion()
+
+solucionTotal = np.zeros((len(t),nx+1))
+solucionTotal[0] = T
+for i in range(1,len(t)):
+    plt.clf()
+    for n in range(1,nx):
+        dTdt[n] = alpha*(-(T[n]-T[n-1])/(dx**2) + (T[n+1]-T[n])/(dx**2))
+    dTdt[0] =  0# TA
+    dTdt[nx] = alpha*(-(T[nx-1]-T[nx-2])/dx**2 + (TB-T[nx-1])/dx**2)
+    T = T+dTdt*dt
+    solucionTotal[i, :] = T
+    print(1)
+    plt.figure()
+   
+    plt.plot(x,solucionTotal[0])
+    plt.plot(x,solucionTotal[-1])
+    plt.text(1,1,f"t: {i*dt}")
+    plt.plot(x,T)
+    plt.xlim(0,L)
+    plt.ylim(min(TA,TB,T0)-5,max(T0,TA,TB)+5)
+    plt.xlabel("Distancia")
+    plt.ylabel("Temperatura")
+    plt.show()
+    plt.pause(0)
+    plt.figure()
